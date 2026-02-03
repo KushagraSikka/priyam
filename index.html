@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priyam Thakkar Official Fan Club</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #FFD700;
+            --pink: #FF69B4;
+            --purple: #8B5CF6;
+            --dark: #0a0a0a;
+            --darker: #050505;
+        }
+
+        body {
+            background: var(--darker);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text y="24" font-size="24">%E2%9D%A4%EF%B8%8F</text></svg>') 16 16, auto;
+        }
+
+        /* INTRO OVERLAY */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        #intro-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #intro-overlay h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 5rem);
+            background: linear-gradient(135deg, var(--gold), var(--pink), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        #intro-overlay p {
+            color: #888;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            animation: blink 1s infinite;
+        }
+
+        #enter-btn {
+            margin-top: 2rem;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: 2px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            cursor: pointer;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #enter-btn:hover {
+            background: var(--gold);
+            color: black;
+            box-shadow: 0 0 40px rgba(255,215,0,0.5);
+        }
+
+        /* FLOATING HEARTS */
+        .heart {
+            position: fixed;
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUp 3s ease-in forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(-400px) rotate(720deg) scale(0); }
+        }
+
+        /* CONFETTI */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 9998;
+            pointer-events: none;
+            animation: confettiFall 3s ease-in forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+        }
+
+        /* AUDIO BAR */
+        #audio-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.95);
+            border-top: 1px solid #333;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(20px);
+        }
+
+        #audio-bar .now-playing {
+            color: var(--gold);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #audio-bar .song-title {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        #play-btn {
+            background: var(--gold);
+            border: none;
+            color: black;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .eq-bars {
+            display: flex;
+            align-items: end;
+            gap: 2px;
+            height: 20px;
+        }
+
+        .eq-bars .bar {
+            width: 3px;
+            background: var(--gold);
+            animation: eqBounce 0.5s ease infinite alternate;
+        }
+
+        .eq-bars .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .eq-bars .bar:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+        .eq-bars .bar:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+        .eq-bars .bar:nth-child(4) { height: 20px; animation-delay: 0.15s; }
+        .eq-bars .bar:nth-child(5) { height: 12px; animation-delay: 0.05s; }
+
+        @keyframes eqBounce {
+            to { height: 4px; }
+        }
+
+        .eq-bars.paused .bar { animation-play-state: paused; }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 2rem;
+            background: radial-gradient(ellipse at center, rgba(139,92,246,0.15) 0%, transparent 70%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" x="20" font-size="15" opacity="0.03">%E2%9D%A4%EF%B8%8F</text></svg>') repeat;
+            background-size: 80px;
+            animation: bgScroll 20s linear infinite;
+        }
+
+        @keyframes bgScroll {
+            to { background-position: 80px 80px; }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-photo {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 60px rgba(255,215,0,0.3), 0 0 120px rgba(139,92,246,0.2);
+            position: relative;
+            z-index: 1;
+            animation: heroFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold), #FFF, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+            line-height: 1.1;
+        }
+
+        .hero .subtitle {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--pink);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .tagline {
+            color: #888;
+            margin-top: 1rem;
+            max-width: 500px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* STATS TICKER */
+        .stats-ticker {
+            background: linear-gradient(90deg, var(--gold), var(--pink), var(--purple), var(--gold));
+            background-size: 300% 100%;
+            animation: gradientSlide 4s ease infinite;
+            padding: 1.2rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        @keyframes gradientSlide {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .stat-item {
+            text-align: center;
+            color: black;
+            font-weight: 700;
+        }
+
+        .stat-item .number {
+            font-size: 1.8rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-item .label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* SECTION STYLES */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--gold), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
+            font-size: 0.95rem;
+        }
+
+        /* GALLERY / HALL OF FAME */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111;
+            border: 1px solid #222;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255,215,0,0.15);
+        }
+
+        .gallery-card img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-card .card-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(255,215,0,0.9);
+            color: black;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .gallery-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .gallery-card .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .gallery-card .card-desc {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .gallery-card .card-likes {
+            margin-top: 1rem;
+            color: var(--pink);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* VIDEO SECTION */
+        .video-section {
+            text-align: center;
+        }
+
+        .video-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #222;
+            box-shadow: 0 20px 80px rgba(139,92,246,0.2);
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-caption {
+            margin-top: 1rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* TESTIMONIALS */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial {
+            background: linear-gradient(135deg, #111, #0a0a0a);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .testimonial::before {
+            content: '"';
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            color: var(--gold);
+            opacity: 0.2;
+            position: absolute;
+            top: 0.5rem;
+            left: 1rem;
+            line-height: 1;
+        }
+
+        .testimonial .text {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial .author {
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .testimonial .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .testimonial .author-name {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .testimonial .author-role {
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        .testimonial .stars {
+            color: var(--gold);
+            margin-top: 1rem;
+            letter-spacing: 2px;
+        }
+
+        /* MERCH SECTION */
+        .merch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .merch-item {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 16px;
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .merch-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .merch-emoji {
+            font-size: 5rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #1a1a1a, #111);
+        }
+
+        .merch-info {
+            padding: 1.5rem;
+        }
+
+        .merch-info h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .merch-info .price {
+            color: var(--gold);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .merch-info .price .original {
+            text-decoration: line-through;
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+
+        .sold-out {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.4rem 1rem;
+            background: #ff4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        /* MEMBERSHIP CTA */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: radial-gradient(ellipse at center, rgba(255,215,0,0.08) 0%, transparent 70%);
+        }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(135deg, var(--gold), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: #888;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 1px solid #333;
+            background: #111;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .cta-form input:focus {
+            border-color: var(--gold);
+        }
+
+        .cta-form button {
+            padding: 1rem 2rem;
+            background: var(--gold);
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .cta-form button:hover {
+            box-shadow: 0 0 30px rgba(255,215,0,0.4);
+        }
+
+        /* SCROLLING MARQUEE */
+        .marquee-wrap {
+            overflow: hidden;
+            padding: 1rem 0;
+            border-top: 1px solid #111;
+            border-bottom: 1px solid #111;
+            background: #080808;
+        }
+
+        .marquee {
+            display: flex;
+            gap: 3rem;
+            animation: marqueeScroll 20s linear infinite;
+            width: max-content;
+        }
+
+        .marquee span {
+            white-space: nowrap;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #222;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        @keyframes marqueeScroll {
+            to { transform: translateX(-50%); }
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem 6rem;
+            border-top: 1px solid #111;
+        }
+
+        footer .disclaimer {
+            color: #333;
+            font-size: 0.7rem;
+            max-width: 500px;
+            margin: 1rem auto 0;
+            line-height: 1.6;
+        }
+
+        footer .made-with {
+            color: #444;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        /* FLOATING ACTION */
+        .floating-counter {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 999;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #333;
+            backdrop-filter: blur(20px);
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff4444;
+            border-radius: 50%;
+            animation: livePulse 1.5s ease infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* WANTED POSTER */
+        .wanted-section {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 40px,
+                rgba(255,215,0,0.02) 40px,
+                rgba(255,215,0,0.02) 41px
+            );
+        }
+
+        .wanted-poster {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #f4e4b0;
+            padding: 2rem;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: rotate(-1deg);
+            position: relative;
+        }
+
+        .wanted-poster::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid #8B4513;
+        }
+
+        .wanted-poster h2 {
+            font-family: 'Playfair Display', serif;
+            color: #8B4513;
+            font-size: 3rem;
+            letter-spacing: 8px;
+        }
+
+        .wanted-poster .reward {
+            color: #8B4513;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 0.5rem 0;
+        }
+
+        .wanted-poster img {
+            width: 200px;
+            height: 250px;
+            object-fit: cover;
+            border: 3px solid #8B4513;
+            margin: 1rem 0;
+            filter: sepia(30%);
+        }
+
+        .wanted-poster .name {
+            font-family: 'Playfair Display', serif;
+            color: #8B4513;
+            font-size: 1.8rem;
+        }
+
+        .wanted-poster .charges {
+            color: #8B4513;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* SLEEPING MUSEUM */
+        .museum-section {
+            background: linear-gradient(180deg, #050505, #0a0507, #050505);
+        }
+
+        .museum-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .museum-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1a1a1a;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .museum-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 40px rgba(139,92,246,0.2);
+        }
+
+        .museum-item img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .museum-item .museum-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 1rem 1rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+        }
+
+        .museum-item .museum-title {
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .museum-item .museum-desc {
+            color: #999;
+            font-size: 0.75rem;
+        }
+
+        .museum-plaque {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #222;
+            border-radius: 12px;
+            background: #0a0a0a;
+        }
+
+        .museum-plaque p {
+            color: #666;
+            font-style: italic;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .museum-plaque .curator {
+            color: var(--gold);
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* EVOLUTION / THROWBACK */
+        .evolution-section {
+            text-align: center;
+        }
+
+        .evolution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .evo-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111;
+            border: 1px solid #222;
+            transition: transform 0.3s;
+        }
+
+        .evo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .evo-card img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .evo-card .evo-era {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(139,92,246,0.9);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .evo-card .evo-body {
+            padding: 1.5rem;
+        }
+
+        .evo-card .evo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .evo-card .evo-desc {
+            color: #888;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* DUAL VIDEO */
+        .dual-video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .video-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #222;
+            background: #111;
+        }
+
+        .video-card video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-card .video-card-caption {
+            padding: 1rem 1.5rem;
+            color: #888;
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .museum-grid { grid-template-columns: 1fr; }
+            .evolution-grid { grid-template-columns: 1fr; }
+            .dual-video-grid { grid-template-columns: 1fr; }
+        }
+
+        /* FAN WALL */
+        .fan-wall-section {
+            max-width: 900px;
+        }
+
+        .fan-wall-form {
+            background: linear-gradient(135deg, #111, #0a0a0a);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .fan-wall-form h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row input, .fan-wall-form textarea {
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-row input:focus, .fan-wall-form textarea:focus {
+            border-color: var(--gold);
+        }
+
+        .fan-wall-form textarea {
+            min-height: 80px;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .form-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border: 1px dashed #444;
+            border-radius: 10px;
+            color: #888;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-label:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .upload-label input { display: none; }
+
+        .upload-label .upload-icon { font-size: 1.2rem; }
+
+        .upload-preview {
+            display: none;
+            margin-bottom: 1rem;
+            position: relative;
+            max-width: 200px;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .upload-preview .remove-img {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post-btn {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .post-btn:hover {
+            box-shadow: 0 0 25px rgba(255,215,0,0.4);
+            transform: translateY(-1px);
+        }
+
+        .post-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Wall posts */
+        .wall-posts {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .wall-post {
+            background: #111;
+            border: 1px solid #1a1a1a;
+            border-radius: 16px;
+            padding: 1.5rem;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wall-post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .wall-post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .wall-post-name {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .wall-post-time {
+            color: #555;
+            font-size: 0.75rem;
+        }
+
+        .wall-post-message {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .wall-post-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #222;
+            margin-top: 0.5rem;
+        }
+
+        .wall-empty {
+            text-align: center;
+            color: #444;
+            padding: 3rem 1rem;
+            font-size: 1rem;
+        }
+
+        .wall-loading {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+        }
+
+        .wall-post-count {
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .stats-ticker { gap: 1.5rem; padding: 1rem; }
+            .stat-item .number { font-size: 1.3rem; }
+            .gallery-grid, .testimonials-grid, .merch-grid { grid-template-columns: 1fr; }
+            .cta-form { flex-direction: column; }
+            .form-row { flex-direction: column; }
+            .form-bottom { flex-direction: column; align-items: stretch; }
+            .hero-photo { width: 180px; height: 180px; }
+            section { padding: 3rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INTRO OVERLAY -->
+    <div id="intro-overlay">
+        <h1>You've Been Invited...</h1>
+        <p>to the most exclusive fan club on the internet</p>
+        <button id="enter-btn" onclick="enterSite()">ENTER IF YOU DARE</button>
+    </div>
+
+    <!-- LIVE COUNTER -->
+    <div class="floating-counter" id="live-counter" style="display:none;">
+        <div class="live-dot"></div>
+        <span><strong id="viewer-count">4,847</strong> fans online</span>
+    </div>
+
+    <!-- AUDIO BAR -->
+    <div id="audio-bar" style="display:none;">
+        <button id="play-btn" onclick="toggleAudio()">&#9654;</button>
+        <div class="eq-bars paused" id="eq-bars">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div>
+            <div class="now-playing">Now Playing</div>
+            <div class="song-title">Priyam's Official Anthem &mdash; Randi Babu Randi (A.R. Rahman)</div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">EST. 2019 &bull; OFFICIAL &bull; VERIFIED</div>
+        <img src="assets/photo2.jpg" alt="The Legend" class="hero-photo" id="hero-img">
+        <h1>PRIYAM THAKKAR</h1>
+        <div class="subtitle">The Official Fan Club & Appreciation Society</div>
+        <p class="tagline">Welcome to the only page on the internet dedicated to celebrating the unmatched greatness, unparalleled charm, and completely real achievements of Priyam Thakkar. Member since CCE 2019. Legend since birth.</p>
+    </section>
+
+    <!-- STATS TICKER -->
+    <div class="stats-ticker">
+        <div class="stat-item">
+            <div class="number" id="members-count">12,847</div>
+            <div class="label">Members Worldwide</div>
+        </div>
+        <div class="stat-item">
+            <div class="number">47</div>
+            <div class="label">Countries Represented</div>
+        </div>
+        <div class="stat-item">
+            <div class="number">#1</div>
+            <div class="label">Most Followed Fan Club</div>
+        </div>
+        <div class="stat-item">
+            <div class="number">0</div>
+            <div class="label">People Who Disagree</div>
+        </div>
+    </div>
+
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+        <div class="marquee">
+            <span>PRIYAM SUPREMACY</span>
+            <span>&hearts;</span>
+            <span>LEGEND AMONG LEGENDS</span>
+            <span>&hearts;</span>
+            <span>CCE 2019 GOAT</span>
+            <span>&hearts;</span>
+            <span>NATIONAL TREASURE</span>
+            <span>&hearts;</span>
+            <span>PRIYAM SUPREMACY</span>
+            <span>&hearts;</span>
+            <span>LEGEND AMONG LEGENDS</span>
+            <span>&hearts;</span>
+            <span>CCE 2019 GOAT</span>
+            <span>&hearts;</span>
+            <span>NATIONAL TREASURE</span>
+            <span>&hearts;</span>
+        </div>
+    </div>
+
+    <!-- HALL OF FAME -->
+    <section>
+        <h2 class="section-title">Hall of Fame</h2>
+        <p class="section-subtitle">Rare, never-before-seen photos from the Priyam Thakkar Archives&trade;</p>
+
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <div class="card-badge">RARE CANDID</div>
+                <img src="assets/photo1.jpg" alt="Rare Candid">
+                <div class="card-body">
+                    <div class="card-title">"The Thinker" (After-Party Edition)</div>
+                    <div class="card-desc">Captured in his natural habitat after a long night of being the life of the party. Scientists believe he was contemplating the meaning of life. His friends believe he was just done.</div>
+                    <div class="card-likes">&hearts; 23,847 likes &bull; Voted "Most Relatable Photo" by fans</div>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-badge">ICONIC MOMENT</div>
+                <img src="assets/photo4.jpg" alt="The Model Shot">
+                <div class="card-body">
+                    <div class="card-title">"The Zoom Call That Stopped the Internet"</div>
+                    <div class="card-desc">When Priyam joined the video call, 47 people lost the ability to focus. The professor had to pause the lecture. This photo was later submitted to Vogue but rejected for being "too powerful."</div>
+                    <div class="card-likes">&hearts; 31,293 likes &bull; Trending #PriyamOnZoom for 3 days</div>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-badge">FAN FAVORITE</div>
+                <img src="assets/photo2.jpg" alt="B&W Portrait">
+                <div class="card-body">
+                    <div class="card-title">"The Official Portrait"</div>
+                    <div class="card-desc">Taken for the cover of Forbes' "30 Under 30 Who Think They're Models" edition. The black & white filter was added to contain the sheer power radiating from this image.</div>
+                    <div class="card-likes">&hearts; 45,102 likes &bull; Featured in "Handsome or Delusional?" magazine</div>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-badge">CAUGHT IN 4K</div>
+                <img src="assets/photo5_closeup.jpg" alt="The Closeup">
+                <div class="card-body">
+                    <div class="card-title">"The Unfiltered Truth"</div>
+                    <div class="card-desc">When someone opens the front camera by accident but you're Priyam so it doesn't matter. This close-up was taken at a distance scientists call "way too close." He uploaded it anyway. Respect.</div>
+                    <div class="card-likes">&hearts; 18,204 likes &bull; Won "Most Zoomed-In Face" award 2023</div>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-badge">THE LOOK&trade;</div>
+                <img src="assets/photo9_restaurant.jpg" alt="Restaurant Shot">
+                <div class="card-body">
+                    <div class="card-title">"The Over-The-Shoulder That Ended Careers"</div>
+                    <div class="card-desc">Priyam casually looking over his shoulder at a restaurant like he's in a perfume commercial nobody asked for. The glasses add +50 intellectual points. The smirk adds +100 delusion.</div>
+                    <div class="card-likes">&hearts; 37,651 likes &bull; Banned from 3 dating apps for being "too much"</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WANTED POSTER -->
+    <div class="wanted-section">
+        <div class="wanted-poster">
+            <h2>WANTED</h2>
+            <div class="reward">REWARD: A FOLLOW-BACK</div>
+            <img src="assets/photo3.jpg" alt="Wanted">
+            <div class="name">PRIYAM THAKKAR</div>
+            <div class="charges">
+                Wanted for: Stealing hearts without permission<br>
+                Chronic lateness to every plan ever made<br>
+                Leaving friends on read since 2019<br>
+                Being too confident with absolutely no reason<br>
+                Saying "5 minutes" and arriving in 45
+            </div>
+        </div>
+    </div>
+
+    <!-- SLEEPING MUSEUM -->
+    <section class="museum-section">
+        <h2 class="section-title">The Sleeping Museum</h2>
+        <p class="section-subtitle">A curated exhibition of Priyam in his most natural state. Open 24/7, just like his naps.</p>
+
+        <div class="museum-grid">
+            <div class="museum-item">
+                <img src="assets/photo1.jpg" alt="Exhibit A">
+                <div class="museum-label">
+                    <div class="museum-title">Exhibit A: "The Car Nap"</div>
+                    <div class="museum-desc">Mixed media &bull; Backseat of someone's car &bull; Unknown year</div>
+                </div>
+            </div>
+            <div class="museum-item">
+                <img src="assets/photo6_sleeping_face.jpg" alt="Exhibit B">
+                <div class="museum-label">
+                    <div class="museum-title">Exhibit B: "Peaceful Surrender"</div>
+                    <div class="museum-desc">Oil on bedsheet &bull; Hostel room &bull; Phone still in hand</div>
+                </div>
+            </div>
+            <div class="museum-item">
+                <img src="assets/photo7_sleeping_full.jpg" alt="Exhibit C">
+                <div class="museum-label">
+                    <div class="museum-title">Exhibit C: "The Full Commitment"</div>
+                    <div class="museum-desc">Jeans AND socks still on &bull; Didn't even try &bull; Respect</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="museum-plaque">
+            <p>"The Sleeping Museum is the world's first and only gallery dedicated to documenting one man's unmatched ability to fall asleep anywhere, anytime, fully clothed, mid-conversation, without warning. Priyam has never once been consulted about this exhibit."</p>
+            <div class="curator">&mdash; The Curator (Priyam's Roommate)</div>
+        </div>
+    </section>
+
+    <!-- EVOLUTION / THROWBACK -->
+    <section class="evolution-section">
+        <h2 class="section-title">The Priyam Evolution</h2>
+        <p class="section-subtitle">From innocent child to uncontrollable menace. A visual timeline.</p>
+
+        <div class="evolution-grid">
+            <div class="evo-card">
+                <div class="evo-era">THE EARLY DAYS</div>
+                <img src="assets/photo8_throwback.jpg" alt="Throwback">
+                <div class="evo-body">
+                    <div class="evo-title">Season 1: "The Facebook Era"</div>
+                    <div class="evo-desc">Young Priyam. Glasses. Beach. Innocent smile. This was before the glow-up. Before the confidence. Before the 45-minute late arrivals. We didn't know what was coming. Nobody did.</div>
+                </div>
+            </div>
+            <div class="evo-card">
+                <div class="evo-era">THE GLOW UP</div>
+                <img src="assets/photo9_restaurant.jpg" alt="Glow Up">
+                <div class="evo-body">
+                    <div class="evo-title">Season 3: "The Transformation"</div>
+                    <div class="evo-desc">The glasses stayed but everything else changed. The confidence arrived uninvited and never left. The over-the-shoulder pose was perfected. Restaurant staff started asking for HIS order first.</div>
+                </div>
+            </div>
+            <div class="evo-card">
+                <div class="evo-era">FINAL FORM</div>
+                <img src="assets/photo10_videocall.jpg" alt="Final Form">
+                <div class="evo-body">
+                    <div class="evo-title">Season 5: "The Video Call Menace"</div>
+                    <div class="evo-desc">Instagram video calls at full zoom. No filter needed. No angle too close. This is Priyam in his final form &mdash; untouchable, unfiltered, and completely unbothered by what anyone thinks.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIDEO SECTION -->
+    <section class="video-section">
+        <h2 class="section-title">Exclusive Footage</h2>
+        <p class="section-subtitle">Content so rare, even Priyam doesn't know it exists</p>
+        <div class="dual-video-grid">
+            <div class="video-card">
+                <video controls playsinline preload="metadata">
+                    <source src="assets/priyam_video.mp4" type="video/mp4">
+                    <source src="assets/priyam_video.mov" type="video/mp4">
+                </video>
+                <div class="video-card-caption">"Leaked footage #1 &mdash; Source: A friend who chose violence"</div>
+            </div>
+            <div class="video-card">
+                <video controls playsinline preload="metadata">
+                    <source src="assets/priyam_video2.mp4" type="video/mp4">
+                </video>
+                <div class="video-card-caption">"Leaked footage #2 &mdash; Obtained at great personal risk"</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section>
+        <h2 class="section-title">What The Fans Say</h2>
+        <p class="section-subtitle">Real testimonials from real people (source: trust me bro)</p>
+
+        <div class="testimonials-grid">
+            <div class="testimonial">
+                <div class="text">I once made eye contact with Priyam at a party. My life has never been the same. I now divide my existence into "Before Priyam" and "After Priyam." I started a journal. I've written 47 entries.</div>
+                <div class="stars">&starf;&starf;&starf;&starf;&starf;</div>
+                <div class="author">
+                    <div class="author-avatar">&#128525;</div>
+                    <div>
+                        <div class="author-name">Anonymous Stan</div>
+                        <div class="author-role">Founding Member, Est. 2019</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                <div class="text">Priyam once said "I'll text you back in 5 minutes." That was in 2021. I'm still waiting. I've aged. I've changed. I've grown a beard. But the reply? Never came. Iconic behavior.</div>
+                <div class="stars">&starf;&starf;&starf;&starf;&star;</div>
+                <div class="author">
+                    <div class="author-avatar">&#128241;</div>
+                    <div>
+                        <div class="author-name">A Friend Who's Still Waiting</div>
+                        <div class="author-role">Left On Read Since 2021</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                <div class="text">He said "bro I'll be there in 10 minutes" and showed up 2 hours later looking like he just did a photoshoot. Zero apology. Maximum swag. I can't even be mad. That's his superpower.</div>
+                <div class="stars">&starf;&starf;&starf;&starf;&starf;</div>
+                <div class="author">
+                    <div class="author-avatar">&#9200;</div>
+                    <div>
+                        <div class="author-name">Every Friend Ever</div>
+                        <div class="author-role">Chronic Wait Survivor</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                <div class="text">One time Priyam sent a voice note instead of replying to my text. It was 4 minutes long and answered nothing. Iconic behavior honestly. King of doing the most while delivering the least.</div>
+                <div class="stars">&starf;&starf;&starf;&starf;&starf;</div>
+                <div class="author">
+                    <div class="author-avatar">&#127908;</div>
+                    <div>
+                        <div class="author-name">GroupChat Survivor</div>
+                        <div class="author-role">Priyam Voice Note Victim #284</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MERCH -->
+    <section>
+        <h2 class="section-title">Official Merch</h2>
+        <p class="section-subtitle">Wear your dedication. Show the world you stan the one and only.</p>
+
+        <div class="merch-grid">
+            <div class="merch-item">
+                <div class="merch-emoji">&#128085;</div>
+                <div class="merch-info">
+                    <h3>"I &hearts; Priyam" T-Shirt</h3>
+                    <div class="price">$49.99 <span class="original">$12.99</span></div>
+                    <div class="sold-out">SOLD OUT</div>
+                </div>
+            </div>
+            <div class="merch-item">
+                <div class="merch-emoji">&#9749;</div>
+                <div class="merch-info">
+                    <h3>"Priyam Left Me On Read" Mug</h3>
+                    <div class="price">$29.99</div>
+                    <div class="sold-out">BESTSELLER</div>
+                </div>
+            </div>
+            <div class="merch-item">
+                <div class="merch-emoji">&#128247;</div>
+                <div class="merch-info">
+                    <h3>Priyam Sleeping Photo Canvas</h3>
+                    <div class="price">$199.99</div>
+                    <div class="sold-out">LIMITED EDITION</div>
+                </div>
+            </div>
+            <div class="merch-item">
+                <div class="merch-emoji">&#128188;</div>
+                <div class="merch-info">
+                    <h3>"I Waited For Priyam" Support Group Card</h3>
+                    <div class="price">FREE</div>
+                    <div class="sold-out" style="background: var(--purple);">HIGH DEMAND</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAN WALL -->
+    <section class="fan-wall-section" id="fan-wall">
+        <h2 class="section-title">The Fan Wall</h2>
+        <p class="section-subtitle">Drop your tribute, roast, or evidence. Upload pics. Be heard. This is YOUR space.</p>
+
+        <div class="fan-wall-form">
+            <h3>Post on the Wall</h3>
+            <div class="form-row">
+                <input type="text" id="wall-name" placeholder="Your name (or alias)" maxlength="50">
+            </div>
+            <textarea id="wall-message" placeholder="Drop your message, roast, or confession about Priyam..." maxlength="500"></textarea>
+            <div class="upload-preview" id="upload-preview">
+                <img id="preview-img" src="" alt="preview">
+                <button class="remove-img" onclick="removeImage()">&times;</button>
+            </div>
+            <div class="form-bottom">
+                <label class="upload-label">
+                    <span class="upload-icon">&#128247;</span>
+                    <span id="upload-text">Attach a photo</span>
+                    <input type="file" id="wall-image" accept="image/*" onchange="previewImage(this)">
+                </label>
+                <button class="post-btn" id="post-btn" onclick="submitPost()">POST TO WALL</button>
+            </div>
+        </div>
+
+        <div class="wall-post-count" id="wall-count"></div>
+        <div class="wall-posts" id="wall-posts">
+            <div class="wall-loading">Loading the wall...</div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-section">
+        <h2>Join The Fan Club</h2>
+        <p>Enter your email to receive daily Priyam updates, motivational quotes he never said, and exclusive memes straight to your inbox.</p>
+        <div class="cta-form">
+            <input type="email" placeholder="your@email.com" id="email-input">
+            <button onclick="submitEmail()">JOIN NOW</button>
+        </div>
+        <p id="form-msg" style="margin-top:1rem; color: var(--gold); display:none;"></p>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p style="color:#444; font-size:0.9rem;">priyamrandi.com</p>
+        <div class="disclaimer">
+            This website is 100% real and definitely not made by Priyam's friends to roast him. All "facts" are verified by the International Priyam Research Institute (IPRI). Any resemblance to actual events is entirely intentional. Priyam, if you're reading this &mdash; we love you bro. But also, reply to the group chat.
+        </div>
+        <div class="made-with">
+            Created by Priyam's Original Daddy
+        </div>
+    </footer>
+
+    <script>
+        // ENTER SITE
+        function enterSite() {
+            document.getElementById('intro-overlay').classList.add('hidden');
+            document.getElementById('live-counter').style.display = 'flex';
+            document.getElementById('audio-bar').style.display = 'flex';
+            launchConfetti();
+            spawnHearts();
+            startCounters();
+            // Auto-play anthem on enter
+            anthem.play().then(() => {
+                audioPlaying = true;
+                document.getElementById('play-btn').innerHTML = '&#9646;&#9646;';
+                document.getElementById('eq-bars').classList.remove('paused');
+            }).catch(() => {});
+        }
+
+        // CONFETTI EXPLOSION
+        function launchConfetti() {
+            const colors = ['#FFD700', '#FF69B4', '#8B5CF6', '#FF4444', '#00FF88', '#FF6600'];
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + 'vw';
+                    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    c.style.width = (Math.random() * 10 + 5) + 'px';
+                    c.style.height = (Math.random() * 10 + 5) + 'px';
+                    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 4000);
+                }, Math.random() * 800);
+            }
+        }
+
+        // FLOATING HEARTS
+        function spawnHearts() {
+            const emojis = ['\u2764\uFE0F', '\uD83D\uDE0D', '\uD83D\uDD25', '\u2728', '\uD83D\uDC96', '\uD83D\uDE18', '\uD83E\uDD29'];
+            setInterval(() => {
+                const h = document.createElement('div');
+                h.className = 'heart';
+                h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.top = (Math.random() * 60 + 40) + 'vh';
+                document.body.appendChild(h);
+                setTimeout(() => h.remove(), 3000);
+            }, 400);
+        }
+
+        // COUNTERS
+        function startCounters() {
+            // Fake viewer count
+            setInterval(() => {
+                const el = document.getElementById('viewer-count');
+                let n = parseInt(el.textContent.replace(/,/g, ''));
+                n += Math.floor(Math.random() * 5) - 2;
+                el.textContent = n.toLocaleString();
+            }, 2000);
+
+            // Fake members count
+            setInterval(() => {
+                const el = document.getElementById('members-count');
+                let n = parseInt(el.textContent.replace(/,/g, ''));
+                n += Math.floor(Math.random() * 3) + 1;
+                el.textContent = n.toLocaleString();
+            }, 3000);
+        }
+
+        // AUDIO PLAYER
+        const anthem = new Audio('assets/anthem.mp3');
+        anthem.loop = true;
+        let audioPlaying = false;
+        function toggleAudio() {
+            audioPlaying = !audioPlaying;
+            const btn = document.getElementById('play-btn');
+            const eq = document.getElementById('eq-bars');
+            if (audioPlaying) {
+                anthem.play();
+                btn.innerHTML = '&#9646;&#9646;';
+                eq.classList.remove('paused');
+            } else {
+                anthem.pause();
+                btn.innerHTML = '&#9654;';
+                eq.classList.add('paused');
+            }
+        }
+
+        // EMAIL FORM
+        function submitEmail() {
+            const input = document.getElementById('email-input');
+            const msg = document.getElementById('form-msg');
+            if (input.value) {
+                const responses = [
+                    "Congratulations! You are now Stan #" + (Math.floor(Math.random() * 50000) + 10000) + ". Priyam still won't follow you back.",
+                    "Welcome! Your membership card is being printed on Priyam's home printer. (He doesn't know yet.)",
+                    "You're in! Fun fact: Priyam has been notified and is pretending he doesn't care.",
+                    "Registration complete! You will receive your first 'Priyam Daily Motivation' email never.",
+                    "Welcome aboard! Priyam's PR team (his mom) has been informed."
+                ];
+                msg.textContent = responses[Math.floor(Math.random() * responses.length)];
+                msg.style.display = 'block';
+                input.value = '';
+                launchConfetti();
+            }
+        }
+
+        // KEYBOARD EASTER EGG
+        let konamiCode = [];
+        const secretCode = ['p', 'r', 'i', 'y', 'a', 'm'];
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.key.toLowerCase());
+            konamiCode = konamiCode.slice(-6);
+            if (konamiCode.join('') === secretCode.join('')) {
+                document.body.style.transition = 'transform 2s';
+                document.body.style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    document.body.style.transform = '';
+                    alert('PRIYAM SUPREMACY ACTIVATED! \uD83D\uDC51');
+                }, 2000);
+            }
+        });
+
+    </script>
+
+    <!-- SUPABASE FAN WALL (separate script so it can't break the main UI) -->
+    <script>
+        const SUPABASE_URL = 'https://ikkkyyzdyoyzilpofjbc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlra2t5eXpkeW95emlscG9mamJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNTU4MzEsImV4cCI6MjA4NTczMTgzMX0.EhbkP0D7_OeVOCbRtwq3aU_zUYc-qyTHEzhLNZo-hFs';
+        let sb = null;
+        try {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            console.warn('Supabase init failed:', e);
+        }
+
+        let selectedFile = null;
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('upload-preview').style.display = 'block';
+                    document.getElementById('upload-text').textContent = selectedFile.name;
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+
+        function removeImage() {
+            selectedFile = null;
+            document.getElementById('upload-preview').style.display = 'none';
+            document.getElementById('wall-image').value = '';
+            document.getElementById('upload-text').textContent = 'Attach a photo';
+        }
+
+        async function uploadImage(file) {
+            const ext = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+            const { data, error } = await sb.storage
+                .from('fan-uploads')
+                .upload(fileName, file, { contentType: file.type });
+            if (error) throw error;
+            const { data: urlData } = sb.storage
+                .from('fan-uploads')
+                .getPublicUrl(fileName);
+            return urlData.publicUrl;
+        }
+
+        async function submitPost() {
+            const nameInput = document.getElementById('wall-name');
+            const msgInput = document.getElementById('wall-message');
+            const btn = document.getElementById('post-btn');
+            const message = msgInput.value.trim();
+
+            if (!sb) { btn.textContent = 'WALL OFFLINE'; return; }
+            if (!message) {
+                msgInput.style.borderColor = '#ff4444';
+                setTimeout(() => msgInput.style.borderColor = '#333', 2000);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'POSTING...';
+
+            try {
+                let imageUrl = null;
+                if (selectedFile) {
+                    imageUrl = await uploadImage(selectedFile);
+                }
+
+                const { error } = await sb.from('fan_wall').insert({
+                    name: nameInput.value.trim() || 'Anonymous Stan',
+                    message: message,
+                    image_url: imageUrl,
+                });
+
+                if (error) throw error;
+
+                // Reset form
+                nameInput.value = '';
+                msgInput.value = '';
+                removeImage();
+                launchConfetti();
+
+                // Reload posts
+                await loadPosts();
+            } catch (err) {
+                console.error('Post failed:', err);
+                btn.textContent = 'FAILED - TRY AGAIN';
+                setTimeout(() => { btn.textContent = 'POST TO WALL'; }, 2000);
+            } finally {
+                btn.disabled = false;
+                if (btn.textContent === 'POSTING...') btn.textContent = 'POST TO WALL';
+            }
+        }
+
+        function timeAgo(dateStr) {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return mins + 'm ago';
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return hrs + 'h ago';
+            const days = Math.floor(hrs / 24);
+            if (days < 30) return days + 'd ago';
+            return new Date(dateStr).toLocaleDateString();
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderPost(post) {
+            const imageHtml = post.image_url
+                ? `<img class="wall-post-image" src="${escapeHtml(post.image_url)}" alt="Fan upload" loading="lazy">`
+                : '';
+
+            return `
+                <div class="wall-post">
+                    <div class="wall-post-header">
+                        <div class="wall-post-avatar">${getInitials(post.name)}</div>
+                        <div>
+                            <div class="wall-post-name">${escapeHtml(post.name)}</div>
+                            <div class="wall-post-time">${timeAgo(post.created_at)}</div>
+                        </div>
+                    </div>
+                    <div class="wall-post-message">${escapeHtml(post.message)}</div>
+                    ${imageHtml}
+                </div>
+            `;
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('wall-posts');
+            const countEl = document.getElementById('wall-count');
+
+            if (!sb) {
+                container.innerHTML = '<div class="wall-empty">Fan Wall connects when hosted online. Stay tuned!</div>';
+                return;
+            }
+
+            try {
+                const { data, error, count } = await supabase
+                    .from('fan_wall')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div class="wall-empty">No posts yet. Be the first to roast Priyam!</div>';
+                    countEl.textContent = '';
+                } else {
+                    container.innerHTML = data.map(renderPost).join('');
+                    countEl.textContent = `${count || data.length} posts on the wall`;
+                }
+            } catch (err) {
+                console.error('Load posts failed:', err);
+                container.innerHTML = '<div class="wall-empty">Could not load the wall. Try refreshing.</div>';
+            }
+        }
+
+        // Real-time subscription for new posts
+        function subscribeToWall() {
+            if (!sb) return;
+            sb
+                .channel('fan_wall_changes')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fan_wall' }, (payload) => {
+                    const container = document.getElementById('wall-posts');
+                    const emptyMsg = container.querySelector('.wall-empty');
+                    if (emptyMsg) container.innerHTML = '';
+
+                    const postHtml = renderPost(payload.new);
+                    container.insertAdjacentHTML('afterbegin', postHtml);
+
+                    // Update count
+                    const countEl = document.getElementById('wall-count');
+                    const current = parseInt(countEl.textContent) || 0;
+                    countEl.textContent = `${current + 1} posts on the wall`;
+                })
+                .subscribe();
+        }
+
+        // Load wall on page ready
+        loadPosts();
+        subscribeToWall();
+
+        // CURSOR TRAIL
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.92) {
+                const s = document.createElement('div');
+                s.textContent = '\u2728';
+                s.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;pointer-events:none;font-size:12px;z-index:9999;transition:all 1s;opacity:1;`;
+                document.body.appendChild(s);
+                requestAnimationFrame(() => {
+                    s.style.opacity = '0';
+                    s.style.transform = `translateY(-30px) scale(0)`;
+                });
+                setTimeout(() => s.remove(), 1000);
+            }
+        });
+    </script>
+</body>
+</html>
