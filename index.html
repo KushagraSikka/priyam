@@ -1643,6 +1643,8 @@
         // AUDIO PLAYER
         const anthem = new Audio('assets/anthem.mp3');
         anthem.loop = true;
+        anthem.currentTime = 60;
+        anthem.addEventListener('ended', () => { anthem.currentTime = 60; anthem.play(); });
         let audioPlaying = false;
         function toggleAudio() {
             audioPlaying = !audioPlaying;
